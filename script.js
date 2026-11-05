@@ -2598,6 +2598,12 @@ function speakText() {
   if (typeof showToast === 'function') showToast('A voz está silenciada. Aperte Ligar voz.');
 }
 
+// A leitura para enquanto a criança escolhe: a amostra não pode disputar com ela.
+function abrirVozDoQuiz() {
+  pararFala();
+  openModal('modalNarracao');
+}
+
 // Ao ligar de novo, a pergunta é lida para a criança ouvir que a voz voltou.
 function alternarMudo() {
   const voz = window.CM_NARRACAO;
@@ -2930,6 +2936,7 @@ const ACOES_DOS_BOTOES = {
   apagarNaConta:    function ()       { apagarNaConta(); },
   speakText:     function ()          { speakText(); },
   alternarMudo:  function ()          { alternarMudo(); },
+  abrirVozDoQuiz: function ()         { abrirVozDoQuiz(); },
   spinRoulette:  function ()          { spinRoulette(); },
   startMode:     function (modo)      { startMode(modo); },
   toggleSound:   function ()          { toggleSound(); },

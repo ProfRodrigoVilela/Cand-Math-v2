@@ -425,6 +425,13 @@
       d.getElementById('btnMudoIcone').className = 'fa-solid ' + (s.desligada ? 'fa-volume-high' : 'fa-volume-xmark');
       d.getElementById('btnMudoTexto').textContent = s.desligada ? 'Ligar voz' : 'Silenciar';
     }
+    const trocar = d.getElementById('btnTrocarVoz');
+    if (trocar) {
+      const nome = s.vozes.length ? s.rotulo : 'Voz';
+      d.getElementById('btnTrocarVozTexto').textContent = nome;
+      trocar.setAttribute('aria-label', s.vozes.length ? 'Escolher a voz. Agora: ' + nome : 'Escolher a voz');
+      trocar.title = 'Escolher a voz';
+    }
     const pendentes = d.getElementById('vozPendentes');
     if (pendentes) {
       let texto = '';

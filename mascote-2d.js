@@ -121,7 +121,10 @@
     const balao = root.document.getElementById('mascoteFalaTexto');
     if (!palco || !balao) return;
     const mostrar = falando && !!s.texto && !falhou;
-    const faixa = mostrar ? root.document.querySelector('.screen.active .m2d-presente') : null;
+    // Com a tela de Voz aberta, a faixa do jogo fica atrás dela: a amostra usa o palco.
+    const overlay = root.document.getElementById('modalOverlay');
+    const modalAberto = !!(overlay && overlay.classList.contains('open'));
+    const faixa = mostrar && !modalAberto ? root.document.querySelector('.screen.active .m2d-presente') : null;
     if (faixaDaFala && faixaDaFala !== faixa) faixaDaFala.classList.remove('show');
     faixaDaFala = faixa;
     if (faixa) {
