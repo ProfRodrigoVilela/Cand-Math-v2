@@ -2595,7 +2595,15 @@ function speakText() {
     if (s.falando || s.carregando) { voz.parar(); return; }
   }
   if (voz && voz.podeFalar()) { voz.falar(G.currentQ.txt); return; }
-  if (typeof showToast === 'function') showToast('A narração está desligada. Acenda em Voz.');
+  if (typeof showToast === 'function') showToast('A voz está silenciada. Aperte Ligar voz.');
+}
+
+// Ao ligar de novo, a pergunta é lida para a criança ouvir que a voz voltou.
+function alternarMudo() {
+  const voz = window.CM_NARRACAO;
+  if (!voz) return;
+  voz.alternarMudo();
+  if (!voz.estado().desligada && voz.estado().automatica && voz.podeFalar()) speakText();
 }
 
 function pararFala() {
@@ -2921,6 +2929,7 @@ const ACOES_DOS_BOTOES = {
   apagarDoAparelho: function ()       { apagarDoAparelho(); },
   apagarNaConta:    function ()       { apagarNaConta(); },
   speakText:     function ()          { speakText(); },
+  alternarMudo:  function ()          { alternarMudo(); },
   spinRoulette:  function ()          { spinRoulette(); },
   startMode:     function (modo)      { startMode(modo); },
   toggleSound:   function ()          { toggleSound(); },

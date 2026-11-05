@@ -23,6 +23,7 @@
 
   const CHAVE_LOCAL = 'candymath_voz_v1';
   const CHAVE_AUTOMATICA = 'candymath_voz_auto_v1';
+  const CHAVE_ANTES_DO_MUDO = 'candymath_voz_antes_v1';
   const TETO_DO_CACHE = 8;          // frases repetidas na mesma sessão
   const FIM_DA_JOGADA = 12000;      // ms esperando a função de voz
   const PREFERENCIAS = ['peixe', 'aparelho', 'desligada'];
@@ -304,12 +305,26 @@
 
   function definirPreferencia(nova) {
     if (PREFERENCIAS.indexOf(nova) < 0) return false;
+    if (nova === 'desligada' && preferencia !== 'desligada') {
+      try { root.localStorage.setItem(CHAVE_ANTES_DO_MUDO, preferencia); } catch (e) { /* sem onde guardar */ }
+    }
     preferencia = nova;
     if (nova === 'desligada') { calar(); apagarCache(); }
     ultimoErro = '';
     salvar();
     avisar();
     return true;
+  }
+
+  // O botão de silenciar devolve a voz que estava em uso: quem escolheu a voz do
+  // aparelho para nada sair do navegador não pode voltar pela voz por IA.
+  function alternarMudo() {
+    if (preferencia !== 'desligada') return definirPreferencia('desligada');
+    let antes = null;
+    try { antes = root.localStorage.getItem(CHAVE_ANTES_DO_MUDO); } catch (e) { antes = null; }
+    const valida = antes && antes !== 'desligada' && PREFERENCIAS.indexOf(antes) >= 0;
+    const padrao = config().preferencia === 'desligada' ? 'aparelho' : config().preferencia;
+    return definirPreferencia(valida ? antes : padrao);
   }
 
   function definirAutomatica(ligada) {
@@ -404,6 +419,12 @@
     }
     const auto = d.getElementById('vozAutomatica');
     if (auto) { auto.checked = s.automatica; auto.disabled = s.desligada; }
+    const mudo = d.getElementById('btnMudo');
+    if (mudo) {
+      mudo.setAttribute('aria-pressed', String(s.desligada));
+      d.getElementById('btnMudoIcone').className = 'fa-solid ' + (s.desligada ? 'fa-volume-high' : 'fa-volume-xmark');
+      d.getElementById('btnMudoTexto').textContent = s.desligada ? 'Ligar voz' : 'Silenciar';
+    }
     const pendentes = d.getElementById('vozPendentes');
     if (pendentes) {
       let texto = '';
@@ -491,6 +512,7 @@
     definirPreferencia: definirPreferencia,
     definirVoz: definirVoz,
     definirAutomatica: definirAutomatica,
+    alternarMudo: alternarMudo,
     estado: function () { return resumo(); },
     aoMudar: aoMudar,
     podeFalar: function () {
