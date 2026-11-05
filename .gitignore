@@ -1,0 +1,11 @@
+# Segredos locais
+.env
+.env.local
+
+# Capturas de auditoria e lixo de editor
+capturas/
+node_modules/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
