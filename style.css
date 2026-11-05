@@ -3013,7 +3013,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 .mc-catch { background: linear-gradient(145deg, #178A83, #1B6FB0); }
 
 /* Hub: são 5 atalhos, e a grade foi desenhada para 4 (deixava um órfão) */
-.hub-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.hub-actions { grid-template-columns: repeat(2, minmax(0,1fr)); }
 .hub-actions > :last-child:nth-child(odd) { grid-column: 1 / -1; }
 @media (min-width: 700px) {
   .hub-actions { grid-template-columns: repeat(5, minmax(0, 1fr)); }
@@ -3040,3 +3040,33 @@ body::before, body::after { display: none; }
   background: url(mascote.svg) center / contain no-repeat;
 }
 .fa-paw { vertical-align: middle; }
+
+/* ===== MASCOTE DE CORPO INTEIRO (mascote-corpo.svg + mascote-2d.js) ===== */
+.m2d-corpo {
+  position: absolute; inset: 0;
+  display: block; width: 100%; height: 100%;
+  overflow: visible; pointer-events: none;
+}
+.m2d-pronto > .onca-base-icon, .m2d-pronto > .wd-onca-base { display: none; }
+.onca-display.m2d-pronto { width: clamp(72px, 9vw, 96px); height: clamp(108px, 13.5vw, 144px); }
+.wd-onca-wrap.m2d-pronto { width: clamp(84px, 12vw, 116px); height: clamp(126px, 18vw, 174px); }
+/* Peças sem desenho seguem como ícone, agora no lugar certo do corpo. */
+.m2d-pronto > .o-hat, .m2d-pronto > .wd-hat { top: 0; }
+.m2d-pronto > .o-wig, .m2d-pronto > .wd-wig { top: 6%; }
+.m2d-pronto > .o-glass, .m2d-pronto > .wd-glass { top: 26%; }
+.m2d-pronto > .o-outfit, .m2d-pronto > .wd-outfit { top: 60%; bottom: auto; transform: translateX(-50%); }
+.m2d-pronto > .o-shoes, .m2d-pronto > .wd-shoes { bottom: 0; }
+.m2d-pronto > .o-acc, .m2d-pronto > .wd-acc { top: 54%; right: -8%; }
+/* Não bloqueia toque: a criança continua respondendo enquanto ele fala. */
+.m2d-fala {
+  position: fixed; left: var(--pad); bottom: var(--pad); z-index: 9000;
+  display: flex; align-items: flex-end; gap: 8px;
+  max-width: calc(100vw - 2 * var(--pad));
+  pointer-events: none;
+}
+.m2d-fala[hidden] { display: none; }
+.m2d-fala-corpo {
+  position: relative; flex-shrink: 0;
+  width: clamp(60px, 9vw, 100px); aspect-ratio: 2 / 3;
+}
+.m2d-fala .qf-bubble { max-width: min(68vw, 420px); margin-bottom: clamp(30px, 6vw, 60px); }

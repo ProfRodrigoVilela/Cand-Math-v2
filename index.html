@@ -701,7 +701,7 @@
       </div>
 
       <div class="wardrobe-preview">
-        <div class="wd-onca-wrap">
+        <div class="wd-onca-wrap" id="wdOncaWrap">
           <div class="wd-onca-base"><i class="fa-solid fa-paw"></i></div>
           <span class="wd-layer wd-wig"    id="wdWig"></span>
           <span class="wd-layer wd-hat"    id="wdHat"></span>
@@ -942,6 +942,12 @@
 
   <!-- A ordem importa: conteúdo primeiro, depois o que consome conteúdo,
        por último o script.js, que liga tudo na tela. -->
+  <!-- O mascote aparece falando em qualquer tela; a voz já diz o mesmo texto. -->
+  <div class="m2d-fala" id="mascoteFala" aria-hidden="true" hidden>
+    <div class="m2d-fala-corpo" id="mascoteFalaCorpo"></div>
+    <div class="qf-bubble" id="mascoteFalaTexto"></div>
+  </div>
+
   <script src="conteudo.js"></script>
   <script src="banco-itens.js"></script>
   <script src="guarda-roupa.js"></script>
@@ -950,6 +956,7 @@
   <script src="duelo.js"></script>
   <script src="config.js"></script>
   <script src="narracao.js"></script>
+  <script src="mascote-2d.js"></script>
   <script src="nuvem.js"></script>
   <script src="script.js"></script>
 </body>

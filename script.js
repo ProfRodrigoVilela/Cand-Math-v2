@@ -615,10 +615,12 @@ function marcarChips() {
   });
 }
 
+// Peça com desenho veste o SVG (mascote-2d.js); as demais ficam no ícone.
 function aplicarEquipamento(elId, slot) {
   const item = G.equip[slot] ? SHOP_ITEMS.find(i => i.id === G.equip[slot]) : null;
   const el = $(elId);
-  if (item) {
+  const desenhada = window.CM_MASCOTE ? CM_MASCOTE.vestir(slot, item) : false;
+  if (item && !desenhada) {
     const col = item.iconColor || 'inherit';
     el.innerHTML = `<i class="fa-solid ${item.icon}" style="color:${col}"></i>`;
   } else {
@@ -2263,15 +2265,7 @@ function updateWardrobePreview() {
     outfit: 'wdOutfit', shoes: 'wdShoes', accessory: 'wdAcc',
   };
   SLOTS_EQUIP.forEach(slot => {
-    const el = $(elMap[slot]);
-    if (!el) return;
-    const item = G.equip[slot] ? GR.porId(G.equip[slot]) : null;
-    if (item) {
-      const col = item.iconColor || 'inherit';
-      el.innerHTML = `<i class="fa-solid ${item.icon}" style="color:${col}"></i>`;
-    } else {
-      el.innerHTML = '';
-    }
+    if ($(elMap[slot])) aplicarEquipamento(elMap[slot], slot);
   });
   // Equipped list text
   const equipped = SLOTS_EQUIP

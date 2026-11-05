@@ -115,6 +115,9 @@
       vozes: c.vozes,
       carregando: carregando,
       falando: !!atual,
+      // Só entre o início e o fim reais do som; 'falando' já acende antes de tocar.
+      emFala: !!(atual && atual.soando),
+      texto: atual && atual.soando ? atual.texto : '',
       nota: nota,
       erro: ultimoErro,
       temAparelho: temVozDoAparelho(),
@@ -164,7 +167,13 @@
     fala.pitch = /miguel/i.test((id && id.rotulo) || '') ? 0.85 : 1.1;
     fala.onend = function () { if (atual && atual.fala === fala) { atual = null; avisar(); } };
     fala.onerror = function () { if (atual && atual.fala === fala) { atual = null; avisar(); } };
-    atual = { fala: fala };
+    function soando(valor) {
+      return function () { if (atual && atual.fala === fala) { atual.soando = valor; avisar(); } };
+    }
+    fala.onstart = soando(true);
+    fala.onresume = soando(true);
+    fala.onpause = soando(false);
+    atual = { fala: fala, texto: texto };
     try { root.speechSynthesis.speak(fala); } catch (e) { atual = null; return false; }
     avisar();
     return true;
@@ -191,7 +200,12 @@
       ultimoErro = 'o áudio chegou mas este aparelho não soube tocar';
       peloAparelho(textoDaChave(chave));
     };
-    atual = { audio: audio };
+    function soando(valor) {
+      return function () { if (atual && atual.audio === audio) { atual.soando = valor; avisar(); } };
+    }
+    audio.onplaying = soando(true);
+    audio.onpause = soando(false);
+    atual = { audio: audio, texto: textoDaChave(chave) };
     avisar();
     audio.play().catch(function () {
       // Celular que exige gesto do usuário: o clique já é o gesto, mas se
