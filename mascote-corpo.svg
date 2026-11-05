@@ -16,6 +16,22 @@
     .m2d-corpo.m2d-falando .m2d-boca-aberta {
       display: inline; animation: m2d-falar 0.42s ease-in-out infinite;
     }
+    .m2d-corpo .m2d-boca-triste { display: none; }
+    .m2d-corpo.m2d-feliz { animation: m2d-pular 0.5s ease-out 2; transform-origin: center bottom; }
+    .m2d-corpo.m2d-feliz .m2d-boca-fechada { display: none; }
+    .m2d-corpo.m2d-feliz .m2d-boca-aberta { display: inline; }
+    .m2d-corpo.m2d-triste { animation: m2d-murchar 1.2s ease-in-out; transform-origin: center bottom; }
+    .m2d-corpo.m2d-triste .m2d-boca-fechada { display: none; }
+    .m2d-corpo.m2d-triste .m2d-boca-triste { display: inline; }
+    @keyframes m2d-pular {
+      0%, 100% { transform: translateY(0) scale(1, 1); }
+      20% { transform: translateY(0) scale(1.06, 0.94); }
+      55% { transform: translateY(-9%) scale(0.97, 1.03); }
+    }
+    @keyframes m2d-murchar {
+      0%, 100% { transform: rotate(0) scale(1, 1); }
+      25%, 70% { transform: rotate(-4deg) scale(1.02, 0.95); }
+    }
     @keyframes m2d-piscar {
       0%, 94%, 100% { transform: scaleY(1); }
       97% { transform: scaleY(0.08); }
@@ -27,7 +43,8 @@
       80% { transform: scaleY(0.9); }
     }
     @media (prefers-reduced-motion: reduce) {
-      .m2d-corpo .m2d-olhos, .m2d-corpo.m2d-falando .m2d-boca-aberta { animation: none; }
+      .m2d-corpo .m2d-olhos, .m2d-corpo.m2d-falando .m2d-boca-aberta,
+      .m2d-corpo.m2d-feliz, .m2d-corpo.m2d-triste { animation: none; }
     }
   </style>
 
@@ -130,6 +147,9 @@
     <path d="M92 110h16l-8 9z" fill="#FF4D8F" stroke="#3A2A4D" stroke-width="2" stroke-linejoin="round"/>
     <g class="m2d-boca-fechada">
       <path d="M100 119v6M86 126Q100 138 114 126" fill="none" stroke="#3A2A4D" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <g class="m2d-boca-triste">
+      <path d="M100 119v6M87 134Q100 123 113 134" fill="none" stroke="#3A2A4D" stroke-width="3" stroke-linecap="round"/>
     </g>
     <g class="m2d-boca-aberta">
       <ellipse cx="100" cy="130" rx="13" ry="11" fill="#3A2A4D"/>

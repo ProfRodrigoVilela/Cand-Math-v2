@@ -22,6 +22,7 @@
   'use strict';
 
   const CHAVE_LOCAL = 'candymath_voz_v1';
+  const CHAVE_AUTOMATICA = 'candymath_voz_auto_v1';
   const TETO_DO_CACHE = 8;          // frases repetidas na mesma sessão
   const FIM_DA_JOGADA = 12000;      // ms esperando a função de voz
   const PREFERENCIAS = ['peixe', 'aparelho', 'desligada'];
@@ -34,6 +35,9 @@
   const ouvintes = [];
   const cache = new Map();          // 'voz|texto' → { url, bytes }
   let atual = null;                 // { audio?, fala? } em reprodução
+  let automatica = true;            // lê cada pergunta sem esperar o botão
+  let pedido = 0;                   // cada calar() invalida a busca em andamento
+  let buscando = null;              // AbortController da busca em andamento
 
   function config() {
     const c = (root.CM_CONFIG && root.CM_CONFIG.narracao) || {};
@@ -123,6 +127,7 @@
       temAparelho: temVozDoAparelho(),
       temEndpoint: !!c.endpoint,
       desligada: preferencia === 'desligada',
+      automatica: automatica,
     };
   }
 
@@ -141,10 +146,13 @@
     preferencia = (lido && PREFERENCIAS.indexOf(lido.preferencia) >= 0)
       ? lido.preferencia : c.preferencia;
     voz = (lido && vozValida(lido.voz)) || vozValida('sara') || (c.vozes[0] && c.vozes[0].id) || 'sara';
+    try { automatica = root.localStorage.getItem(CHAVE_AUTOMATICA) !== '0'; } catch (e) { automatica = true; }
   }
 
   // ── reprodução ───────────────────────────────────────────
   function calar() {
+    pedido++;
+    if (buscando) { try { buscando.abort(); } catch (e) { /* já era */ } buscando = null; }
     if (atual) {
       if (atual.audio) { try { atual.audio.pause(); } catch (e) { /* já era */ } }
       atual = null;
@@ -246,7 +254,9 @@
     nota = '';
     avisar();
 
+    const meuPedido = pedido;
     const ctrl = root.AbortController ? new root.AbortController() : null;
+    buscando = ctrl;
     const relogio = ctrl
       ? root.setTimeout(function () { try { ctrl.abort(); } catch (e) { /* acabou */ } }, FIM_DA_JOGADA)
       : 0;
@@ -267,11 +277,17 @@
         ultimoErro = 'a função de voz respondeu ' + resposta.status;
       }
     } catch (e) {
-      ultimoErro = (e && e.name === 'AbortError') ? 'a voz demorou demais' : 'a voz não chegou';
+      if (meuPedido === pedido) {
+        ultimoErro = (e && e.name === 'AbortError') ? 'a voz demorou demais' : 'a voz não chegou';
+      }
     } finally {
       if (relogio) root.clearTimeout(relogio);
-      carregando = false;
+      if (meuPedido === pedido) { carregando = false; buscando = null; }
     }
+
+    // A criança já respondeu, saiu do jogo ou pediu outra frase: esta chegou
+    // tarde e não pode tocar por cima da seguinte.
+    if (meuPedido !== pedido) return false;
 
     if (!bytes) {
       // Sem drama: cai para o aparelho e segue o jogo. A nota é para quem
@@ -294,6 +310,13 @@
     salvar();
     avisar();
     return true;
+  }
+
+  function definirAutomatica(ligada) {
+    automatica = !!ligada;
+    try { root.localStorage.setItem(CHAVE_AUTOMATICA, automatica ? '1' : '0'); } catch (e) { /* só não pega na próxima vez */ }
+    avisar();
+    return automatica;
   }
 
   function definirVoz(id) {
@@ -379,6 +402,8 @@
         : 'Pronto.';
       estado.classList.toggle('voz-ativa', !!(s.carregando || s.falando));
     }
+    const auto = d.getElementById('vozAutomatica');
+    if (auto) { auto.checked = s.automatica; auto.disabled = s.desligada; }
     const pendentes = d.getElementById('vozPendentes');
     if (pendentes) {
       let texto = '';
@@ -437,6 +462,8 @@
     });
     const pararBotao = d.getElementById('vozParar');
     if (pararBotao) pararBotao.addEventListener('click', function () { calar(); avisar(); });
+    const auto = d.getElementById('vozAutomatica');
+    if (auto) auto.addEventListener('change', function () { definirAutomatica(auto.checked); });
     aoMudar(pintar);
   }
 
@@ -463,6 +490,7 @@
     preferencias: function () { return PREFERENCIAS.slice(); },
     definirPreferencia: definirPreferencia,
     definirVoz: definirVoz,
+    definirAutomatica: definirAutomatica,
     estado: function () { return resumo(); },
     aoMudar: aoMudar,
     podeFalar: function () {

@@ -694,6 +694,7 @@ function goHub() {
   // O duelo tem relógio próprio: se ele continuar pulsando depois de sair da
   // tela, o tempo do jogador segue correndo sem ninguém olhando.
   if (window.CM_DUELO && window.CM_DUELO.parar) window.CM_DUELO.parar();
+  pararFala();
   showScreen('screenHub');
   updateHubUI();
   startIdleMessages();
@@ -762,6 +763,8 @@ function carregarQuiz() {
   const { ordem, certa } = embaralharOpcoes(q.alt);
   renderQuizAnswers(ordem, certa);
   updateQuizDots('current', G.quizIndex);
+  const voz = window.CM_NARRACAO;
+  if (voz && voz.estado().automatica && voz.podeFalar()) voz.falar(q.txt);
 
   // Reinicia a animação do cartão
   $('quizCard').style.animation = 'none';
@@ -783,6 +786,7 @@ function renderQuizAnswers(opts, correctIdx) {
 
 function handleQuizAnswer(chosen, correct, btn) {
   const btns = document.querySelectorAll('.ans-btn');
+  pararFala();
 
   if (chosen === correct) {
     btns.forEach(b => b.disabled = true);
@@ -799,6 +803,7 @@ function handleQuizAnswer(chosen, correct, btn) {
     // Primeira erro: a onça dá uma pista e a criança tenta de novo,
     // sem perder a estrela nem encerrar a questão.
     if (quizTentativas === 1) {
+      if (window.CM_MASCOTE) CM_MASCOTE.reagir('erro');
       showQuizFeedback(pistaDaPergunta(G.currentQ));
       return;
     }
@@ -2531,6 +2536,10 @@ function getAudioCtx() {
   return audioCtx;
 }
 function playSound(type) {
+  if (window.CM_MASCOTE) {
+    if (type === 'correct') CM_MASCOTE.reagir('acerto');
+    if (type === 'wrong') CM_MASCOTE.reagir('erro');
+  }
   if (!G.soundOn) return;
   try {
     const ctx = getAudioCtx();
@@ -2580,6 +2589,11 @@ function playSound(type) {
 function speakText() {
   if (!G.currentQ) return;
   const voz = window.CM_NARRACAO;
+  if (voz) {
+    // Durante a fala o botão mostra "parar", e é isso que ele tem de fazer.
+    const s = voz.estado();
+    if (s.falando || s.carregando) { voz.parar(); return; }
+  }
   if (voz && voz.podeFalar()) { voz.falar(G.currentQ.txt); return; }
   if (typeof showToast === 'function') showToast('A narração está desligada. Acenda em Voz.');
 }

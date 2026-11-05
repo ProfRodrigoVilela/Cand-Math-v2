@@ -37,6 +37,8 @@
   let molde = null;
   let falhou = false;
   let falando = false;
+  let faixaDaFala = null;           // faixa do jogo cujo balão está com a pergunta
+  let relogioReacao = 0;
 
   function pintarSlot(svg, slot) {
     const item = vestido[slot];
@@ -56,9 +58,18 @@
     return !!(item && FORMA[item.id]) && !falhou;
   }
 
+  // Nos jogos ele fica na faixa de feedback, no lugar do rostinho. Duelo e prova
+  // ficam de fora: lá o rostinho só acompanha o resultado.
+  function lugaresParaMontar() {
+    const d = root.document;
+    const fixos = LUGARES.map(function (id) { return d.getElementById(id); });
+    const jogos = d.querySelectorAll('.screen:not(#screenDuelo):not(#screenProva) .qf-onca');
+    jogos.forEach(function (onca) { onca.parentElement.classList.add('m2d-presente'); });
+    return fixos.concat(Array.from(jogos));
+  }
+
   function montar() {
-    LUGARES.forEach(function (id) {
-      const lugar = root.document.getElementById(id);
+    lugaresParaMontar().forEach(function (lugar) {
       if (!lugar) return;
       const svg = root.document.importNode(molde, true);
       svg.classList.toggle('m2d-falando', falando);
@@ -89,6 +100,19 @@
       });
   }
 
+  function reagir(tipo) {
+    const classe = tipo === 'acerto' ? 'm2d-feliz' : 'm2d-triste';
+    root.clearTimeout(relogioReacao);
+    corpos.forEach(function (svg) {
+      svg.classList.remove('m2d-feliz', 'm2d-triste');
+      void svg.getBoundingClientRect();    // reinicia a animação em acertos seguidos
+      svg.classList.add(classe);
+    });
+    relogioReacao = root.setTimeout(function () {
+      corpos.forEach(function (svg) { svg.classList.remove('m2d-feliz', 'm2d-triste'); });
+    }, 1500);
+  }
+
   // emFala só é verdade entre o início e o fim reais do áudio ou da Web Speech.
   function aoMudarVoz(s) {
     falando = !!s.emFala;
@@ -97,11 +121,21 @@
     const balao = root.document.getElementById('mascoteFalaTexto');
     if (!palco || !balao) return;
     const mostrar = falando && !!s.texto && !falhou;
+    const faixa = mostrar ? root.document.querySelector('.screen.active .m2d-presente') : null;
+    if (faixaDaFala && faixaDaFala !== faixa) faixaDaFala.classList.remove('show');
+    faixaDaFala = faixa;
+    if (faixa) {
+      // O mascote já está na tela: fala pelo balão dele, sem abrir um segundo.
+      faixa.querySelector('.qf-bubble').textContent = s.texto;
+      faixa.classList.add('show');
+      palco.hidden = true;
+      return;
+    }
     if (mostrar) balao.textContent = s.texto;
     palco.hidden = !mostrar;
   }
 
-  root.CM_MASCOTE = { vestir: vestir };
+  root.CM_MASCOTE = { vestir: vestir, reagir: reagir };
 
   if (root.document && root.fetch) {
     carregar();

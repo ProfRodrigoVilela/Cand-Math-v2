@@ -3070,3 +3070,18 @@ body::before, body::after { display: none; }
   width: clamp(60px, 9vw, 100px); aspect-ratio: 2 / 3;
 }
 .m2d-fala .qf-bubble { max-width: min(68vw, 420px); margin-bottom: clamp(30px, 6vw, 60px); }
+/* Nos jogos o mascote fica sempre visível; o balão só aparece quando há o que dizer. */
+.quiz-feedback.m2d-presente, .game-feedback.m2d-presente { opacity: 1; }
+.m2d-presente .qf-bubble { opacity: 0; transition: opacity 0.3s ease, translate 0.3s ease; }
+.m2d-presente.show .qf-bubble { opacity: 1; }
+.qf-onca.m2d-pronto {
+  position: relative;
+  width: clamp(48px, 10vmin, 76px); height: clamp(72px, 15vmin, 114px);
+  background: none; border: 0; border-radius: 0;
+}
+.qf-onca.m2d-pronto > .fa-paw { display: none; }
+.voz-auto {
+  display: flex; align-items: center; gap: var(--gap-sm); margin-top: var(--gap);
+  font-weight: 700; color: var(--purple); cursor: pointer;
+}
+.voz-auto input { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--pink); }
